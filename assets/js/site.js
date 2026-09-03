@@ -38,19 +38,42 @@
   const status = document.querySelector('#paper-status');
   const tableHeaders = [...document.querySelectorAll('#papers-table th[data-key]')];
   const columns = tableHeaders.map((header) => header.dataset.key);
-  const numericColumns = new Set(
-    tableHeaders.filter((header) => header.dataset.numeric === 'true')
-      .map((header) => header.dataset.key)
-  );
+  const columnMeta = new Map(tableHeaders.map((header) => [header.dataset.key, {
+    css: header.dataset.col || '',
+    numeric: header.dataset.numeric === 'true',
+    clamp: Number(header.dataset.clamp) || 0,
+    breaks: header.dataset.breaks === 'true',
+  }]));
   const state = { rows: [], query: '', sortKey: null, direction: 1 };
 
-  function recommendationCell(value) {
+  // Browsers will not break a snake_case token, so hint the opportunities:
+  // "beverage_non-alcoholic" wraps after the underscore instead of mid-word.
+  function withBreakHints(value) {
+    const fragment = document.createDocumentFragment();
+    const parts = value.split(/(?<=[_/])/);
+    parts.forEach((part, index) => {
+      fragment.append(document.createTextNode(part));
+      if (index < parts.length - 1) fragment.append(document.createElement('wbr'));
+    });
+    return fragment;
+  }
+
+  // Long prose is clamped so every row keeps the same height. The "more"
+  // button is attached later, only for text that actually overflows.
+  function clampedCell(value, lines) {
     const cell = document.createElement('td');
     const text = document.createElement('div');
-    text.className = 'recommendation-text';
+    text.className = 'clamped-text';
+    text.style.setProperty('--clamp-lines', String(lines));
     text.textContent = value;
     cell.append(text);
-    if (value !== '—' && value.length > 72) {
+    return cell;
+  }
+
+  function attachMoreButtons() {
+    tbody.querySelectorAll('.clamped-text').forEach((text) => {
+      if (text.scrollHeight <= text.clientHeight + 1) return;
+      if (text.nextElementSibling?.classList.contains('more-button')) return;
       const button = document.createElement('button');
       button.type = 'button';
       button.className = 'more-button';
@@ -61,9 +84,8 @@
         button.textContent = expanded ? 'less' : 'more';
         button.setAttribute('aria-expanded', String(expanded));
       });
-      cell.append(button);
-    }
-    return cell;
+      text.after(button);
+    });
   }
 
   function renderTable() {
@@ -83,19 +105,24 @@
     rows.forEach((row) => {
       const tr = document.createElement('tr');
       columns.forEach((key) => {
-        if (key === 'recommendation') {
-          tr.append(recommendationCell(String(row[key])));
-          return;
+        const meta = columnMeta.get(key) || {};
+        const value = String(row[key]);
+        const td = meta.clamp
+          ? clampedCell(value, meta.clamp)
+          : document.createElement('td');
+        if (meta.css) td.classList.add(meta.css);
+        if (meta.numeric) td.classList.add('number');
+        if (!meta.clamp) {
+          if (meta.breaks) td.append(withBreakHints(value));
+          else td.textContent = value;
         }
-        const td = document.createElement('td');
-        if (numericColumns.has(key)) td.classList.add('number');
-        td.textContent = row[key];
         tr.append(td);
       });
       fragment.append(tr);
     });
     tbody.replaceChildren(fragment);
     status.textContent = `Showing ${rows.length} of ${state.rows.length} papers`;
+    requestAnimationFrame(attachMoreButtons);
   }
 
   filter.addEventListener('input', () => { state.query = filter.value; renderTable(); });

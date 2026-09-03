@@ -28,11 +28,10 @@ h1{max-width: 900px;margin-bottom: 18px;font-family: var(--display);font-size: c
 .figure-section, .table-section{padding-top: 58px;}
 .section-heading, .table-heading{display: grid;grid-template-columns: minmax(220px, 0.6fr) minmax(320px, 1.4fr);gap: 40px;align-items: end;margin-bottom: 24px;}
 .section-heading h2, .table-heading h2{font-size: 30px;}
-.figure-grid{display: grid;grid-template-columns: repeat(2, minmax(0, 1fr));gap: 28px;align-items: stretch;}
+.figure-grid{display: grid;grid-template-columns: minmax(0, 1fr);gap: 28px;align-items: stretch;}
 .figure-card{min-width: 0;margin: 0;padding: 32px;border-radius: var(--radius-panel);background: var(--paper);box-shadow: var(--shadow-card);}
-.figure-card.span-2{grid-column: 1 / -1;}
 .figure-card h3{margin-bottom: 22px;font-size: 21px;line-height: 1.25;letter-spacing: -0.012em;text-wrap: balance;}
-.figure-card img{display: block;width: 100%;height: auto;background: white;outline: 1px solid rgba(0, 0, 0, 0.08);outline-offset: -1px;}
+.figure-card img{display: block;width: min(100%, var(--display-w));height: auto;margin-inline: auto;background: white;outline: 1px solid rgba(0, 0, 0, 0.08);outline-offset: -1px;}
 .figure-card figcaption{margin-top: 18px;color: var(--muted);font-size: 14px;line-height: 1.55;text-wrap: pretty;}
 .detail-links{display: flex;flex-wrap: wrap;gap: 8px;margin-top: 18px;}
 .detail-link, .back-link{display: inline-flex;min-height: 40px;align-items: center;padding: 7px 12px;border-radius: var(--radius-control);background: var(--accent-wash);color: var(--accent-dark);font-size: 13px;font-weight: 750;text-decoration: none;transition: background-color 140ms ease-out, transform 100ms ease-out;}
@@ -44,28 +43,27 @@ h1{max-width: 900px;margin-bottom: 18px;font-family: var(--display);font-size: c
 .filter-control input{width: 100%;min-height: 42px;padding: 8px 11px;border: 1px solid #c9c6c0;border-radius: var(--radius-control);background: white;color: var(--ink);}
 .table-status{margin: 0;color: var(--muted);font-size: 13px;font-variant-numeric: tabular-nums;}
 .table-scroll{max-height: 72vh;overflow: auto;overscroll-behavior: contain;}
-table{width: 100%;min-width: 1200px;border-collapse: collapse;table-layout: fixed;font-size: 12px;line-height: 1.35;}
-col.col-paper{width: 80px;}
-col.col-year{width: 45px;}
-col.col-title{width: 210px;}
-col.col-journal{width: 125px;}
-col.col-type{width: 80px;}
-col.col-evaluated{width: 72px;}
-col.col-product{width: 70px;}
-col.col-sensations{width: 80px;}
-col.col-cleansers{width: 80px;}
-col.col-panel{width: 70px;}
-col.col-n-obs{width: 42px;}
-col.col-effective{width: 60px;}
-col.col-recommendation{width: 166px;}
-th, td{padding: 10px 8px;border-bottom: 1px solid rgba(0, 0, 0, 0.06);overflow-wrap: anywhere;text-align: left;vertical-align: top;}
-th{position: sticky;z-index: 2;top: 0;background: #f1efeb;color: #3e4345;font-size: 11px;letter-spacing: 0.02em;}
+table{width: 100%;min-width: 1240px;border-collapse: collapse;table-layout: fixed;font-size: 13px;line-height: 1.45;}
+/* Widths sized from measured content and summing to 1240px, so the eleven columns fill the content column without scrolling sideways on desktop. */ col.col-paper{width: 100px;}
+col.col-title{width: 220px;}
+col.col-journal{width: 136px;}
+col.col-evaluated{width: 80px;}
+col.col-product{width: 104px;}
+col.col-sensations{width: 108px;}
+col.col-cleansers{width: 108px;}
+col.col-panel{width: 96px;}
+col.col-n-obs{width: 52px;}
+col.col-effective{width: 72px;}
+col.col-recommendation{width: 164px;}
+th, td{padding: 10px 9px;border-bottom: 1px solid rgba(0, 0, 0, 0.06);overflow-wrap: break-word;text-align: left;vertical-align: top;}
+/* Prose hyphenates cleanly;the snake_case identifier columns must not, so they rely on the <wbr> hints the renderer inserts instead. */ td.col-title{hyphens: auto;}
+th{position: sticky;z-index: 2;top: 0;background: #f1efeb;color: #3e4345;font-size: 12px;letter-spacing: 0.02em;}
 tbody tr:nth-child(even){background: #fbfaf8;}
 td.number, th.number{text-align: right;font-variant-numeric: tabular-nums;}
 .sort-button{display: inline-flex;min-height: 40px;align-items: center;gap: 4px;margin: -8px -6px;padding: 8px 6px;border: 0;background: transparent;color: inherit;cursor: pointer;font-weight: 750;text-align: inherit;}
 .sort-mark{color: var(--accent-dark);}
-.recommendation-text{display: -webkit-box;overflow: hidden;-webkit-box-orient: vertical;-webkit-line-clamp: 2;}
-.recommendation-text.expanded{display: block;overflow: visible;}
+.clamped-text{display: -webkit-box;overflow: hidden;-webkit-box-orient: vertical;-webkit-line-clamp: var(--clamp-lines, 2);}
+.clamped-text.expanded{display: block;overflow: visible;}
 .more-button{min-height: 40px;margin: 2px 0 -8px;padding: 6px 0;border: 0;background: transparent;color: var(--accent-dark);cursor: pointer;font-size: 12px;font-weight: 750;}
 .noscript-message, .table-error{margin: 0;padding: 22px 24px;color: var(--muted);}
 html:not(.js) .table-toolbar, html:not(.js) .table-scroll, html:not(.js) .table-error{display: none;}
@@ -87,8 +85,8 @@ h1{font-size: clamp(38px, 10vw, 52px);}
 .tab-link{flex: 0 0 auto;}
 .page-main{padding-top: 36px;}
 .workstream-header, .section-heading, .table-heading{grid-template-columns: 1fr;gap: 12px;}
-.figure-grid{grid-template-columns: 1fr;gap: 20px;}
-.figure-card, .figure-card.span-2{grid-column: 1;padding: 20px;}
+.figure-grid{gap: 20px;}
+.figure-card{padding: 20px;}
 .figure-section, .table-section{padding-top: 44px;}
 .table-toolbar{align-items: stretch;flex-direction: column;}
 .filter-control{width: 100%;}
