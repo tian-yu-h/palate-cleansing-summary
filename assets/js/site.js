@@ -8,6 +8,9 @@
     const requested = window.location.hash.slice(1);
     const activeId = panelIds.has(requested) ? requested : defaultTab;
     panels.forEach((panel) => { panel.hidden = panel.id !== activeId; });
+    if (typeof window.gtag === 'function') {
+      window.gtag('event', 'select_content', { content_type: 'tab', content_id: activeId });
+    }
     tabs.forEach((tab) => {
       const active = tab.getAttribute('aria-controls') === activeId;
       tab.setAttribute('aria-selected', String(active));
